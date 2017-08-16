@@ -17,8 +17,11 @@ ActiveRecord::Schema.define(version: 20170816144545) do
   enable_extension "plpgsql"
 
   create_table "users", force: :cascade do |t|
-    t.string "access_token"
-    t.string "refresh_token"
+    t.string "truelayer_access_token",  null: false
+    t.string "truelayer_refresh_token", null: false
+    t.string "truelayer_id",            null: false
   end
+
+  add_index "users", ["truelayer_id"], name: "index_users_on_truelayer_id", unique: true, using: :btree
 
 end
