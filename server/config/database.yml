@@ -1,0 +1,4 @@
+development:
+  adapter: postgresql
+  database: easy_hodl
+  host: localhost
