@@ -1,6 +1,8 @@
 require 'rest-client'
 require 'json'
 require './models/user'
+require './models/transaction'
+require 'digest'
 
 class TrueLayer
     AUTH_URL = "https://auth.truelayer.com".freeze
@@ -27,10 +29,45 @@ class TrueLayer
         access_token = body["access_token"]
         refresh_token = body["refresh_token"]
         credentials_id = get_credentials_id(access_token)
-        User.where(truelayer_id: credentials_id).first_or_create(truelayer_access_token: access_token, truelayer_refresh_token: refresh_token)
+        user = User.where(truelayer_id: credentials_id).first_or_create
+        user.update(truelayer_access_token: access_token, truelayer_refresh_token: refresh_token)
+        user
+    end
+
+    def fetch_user_transactions(user)
+        account_ids = fetch_account_ids(user)
+        account_ids.each do |account_id|
+            fetch_transactions(user, account_id)
+        end
     end
 
     private
+
+    def fetch_account_ids(user)
+        response = RestClient.get(DATA_URL + '/accounts', auth_header(user.truelayer_access_token))
+        body = JSON.parse(response.body)
+        body["results"].map {|account| account["account_id"]}
+    end
+
+    def fetch_transactions(user, account_id)
+        response = RestClient.get(DATA_URL + "/accounts/#{account_id}/transactions", auth_header(user.truelayer_access_token))
+        body = JSON.parse(response.body)
+        body["results"].map {|transaction| store_transaction(user, transaction)}
+    end
+
+    def store_transaction(user, transaction)
+        transaction_id = hash_transaction(transaction, user)
+        currency = transaction["currency"]
+        description = transaction["description"]
+        timestamp = Time.new(transaction["timestamp"])
+        amount = (transaction["amount"] * 100).to_int.abs
+        saved = 100 - (amount % 100)
+        Transaction.where(transaction_id: transaction_id).first_or_create(transaction_id: transaction_id, currency: currency, description: description, timestamp: timestamp, amount: amount, saved: saved, user_id: user.id)
+    end
+
+    def hash_transaction(transaction, user)
+        Digest::SHA256.hexdigest(user.truelayer_id + transaction["timestamp"] + transaction["description"])
+    end
 
     def get_credentials_id(access_token)
         response = RestClient.get(DATA_URL + '/me', auth_header(access_token))
