@@ -29,8 +29,12 @@ class TrueLayer
         access_token = body["access_token"]
         refresh_token = body["refresh_token"]
         credentials_id = get_credentials_id(access_token)
-        user = User.where(truelayer_id: credentials_id).first_or_create
-        user.update(truelayer_access_token: access_token, truelayer_refresh_token: refresh_token)
+        user = User.where(truelayer_id: credentials_id).first
+        if user then
+            user.update(truelayer_access_token: access_token, truelayer_refresh_token: refresh_token)
+        else
+            user = User.create(truelayer_id: credentials_id, truelayer_access_token: access_token, truelayer_refresh_token: refresh_token)
+        end
         user
     end
 
