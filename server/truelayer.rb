@@ -65,7 +65,7 @@ class TrueLayer
         description = transaction["description"]
         timestamp = Time.new(transaction["timestamp"])
         amount = (transaction["amount"] * 100).to_int.abs
-        saved = 100 - (amount % 100)
+        saved = (amount % 100) > 0 ? (100 - (amount % 100)) : 0
         Transaction.where(transaction_id: transaction_id).first_or_create(transaction_id: transaction_id, currency: currency, description: description, timestamp: timestamp, amount: amount, saved: saved, user_id: user.id)
     end
 
