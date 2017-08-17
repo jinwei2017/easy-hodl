@@ -1,3 +1,5 @@
+require_relative '../kraken'
+
 class User < ActiveRecord::Base
     has_many :transactions
     has_many :orders
@@ -21,6 +23,10 @@ class User < ActiveRecord::Base
 
     private
     def place_kraken_order(amount)
-        orders.create(timestamp: Time.now, eth: 0.1, currency_spent: amount)
+        kraken = Kraken.new(self)
+        eth_price = kraken.get_gbp_for_eth
+        volume = (amount.to_f / (100).to_f) /eth_price
+        # kraken.buy_eth(volume)
+        orders.create(timestamp: Time.now, eth: volume, currency_spent: (amount.to_f / (100).to_f))
     end
 end

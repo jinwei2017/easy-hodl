@@ -18,7 +18,7 @@ ActiveRecord::Schema.define(version: 20170817073836) do
 
   create_table "orders", force: :cascade do |t|
     t.datetime "timestamp",                      null: false
-    t.string   "currency",       default: "eur"
+    t.string   "currency",       default: "gbp"
     t.float    "eth",                            null: false
     t.float    "currency_spent",                 null: false
     t.integer  "user_id",                        null: false

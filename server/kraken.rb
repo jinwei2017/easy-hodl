@@ -3,14 +3,14 @@ require 'kraken_client'
 class Kraken
     def initialize(user = nil)
         if user then
-            api_key = user.kraken_api_key
-            api_secret = user.kraken_api_secret
+            api_key = user.kraken_key
+            api_secret = user.kraken_secret
             KrakenClient.load({api_key: api_key, api_secret: api_secret}).config.tier        
         end
     end
 
     def get_gbp_for_eth
-        client.public.ticker('XETHZGBP')['XETHZGBP']['a'][0]
+        client.public.ticker('XETHZGBP')['XETHZGBP']['a'][0].to_f
     end
 
     def buy_eth(volume)
@@ -20,7 +20,7 @@ class Kraken
             ordertype: 'market',
             volume: volume
           }
-          client.private.add_order(opts)
+        client.private.add_order(opts)
     end
 
     private
