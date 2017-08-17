@@ -20,6 +20,14 @@ class EasyHodl < Sinatra::Base
         user.transactions.to_json
     end
 
+    get '/stats' do 
+        user = User.where(truelayer_id: env["HTTP_AUTHORIZATION"]).first!
+        total_amount = user.transactions.sum(:amount)
+        total_save = user.transactions.sum(:saved)
+        no_of_transactions = user.transactions.size
+        {total_save: total_save, total_amount: total_amount, no_of_transactions: no_of_transactions}.to_json
+    end
+
     private
     def truelayer_client
         @truelayer_client ||= TrueLayer.new(ENV["TRUELAYER_CLIENT_ID"], ENV["TRUELAYER_CLIENT_SECRET"])
