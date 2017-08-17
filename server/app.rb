@@ -3,6 +3,7 @@ require "sinatra/activerecord"
 require 'json'
 require './truelayer'
 require './models/order'
+require './kraken'
 
 class EasyHodl < Sinatra::Base
     register Sinatra::ActiveRecordExtension
@@ -31,7 +32,9 @@ class EasyHodl < Sinatra::Base
         total_amount = user.transactions.sum(:amount)
         total_save = user.transactions.sum(:saved)
         no_of_transactions = user.transactions.size
-        {total_save: total_save, total_amount: total_amount, no_of_transactions: no_of_transactions}.to_json
+        hodled_eth = user.orders.sum(:eth)
+        equivalent_gbp = hodled_eth * Kraken.new(user).get_gbp_for_eth
+        {total_save: total_save, total_amount: total_amount, no_of_transactions: no_of_transactions, hodled_eth: hodled_eth, equivalent_gbp: equivalent_gbp}.to_json
     end
 
     patch '/kraken-keys' do
