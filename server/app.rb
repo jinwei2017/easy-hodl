@@ -28,6 +28,12 @@ class EasyHodl < Sinatra::Base
         {total_save: total_save, total_amount: total_amount, no_of_transactions: no_of_transactions}.to_json
     end
 
+    patch '/kraken-keys' do
+        user = User.where(truelayer_id: env["HTTP_AUTHORIZATION"]).first!
+        user.update(kraken_key: params["kraken_key"], kraken_secret: params["kraken_secret"])
+        200
+    end
+
     private
     def truelayer_client
         @truelayer_client ||= TrueLayer.new(ENV["TRUELAYER_CLIENT_ID"], ENV["TRUELAYER_CLIENT_SECRET"])

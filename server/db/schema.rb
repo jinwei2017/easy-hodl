@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170816224034) do
+ActiveRecord::Schema.define(version: 20170817070654) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,6 +33,8 @@ ActiveRecord::Schema.define(version: 20170816224034) do
     t.string "truelayer_access_token",  null: false
     t.string "truelayer_refresh_token", null: false
     t.string "truelayer_id",            null: false
+    t.string "kraken_key"
+    t.string "kraken_secret"
   end
 
   add_index "users", ["truelayer_id"], name: "index_users_on_truelayer_id", unique: true, using: :btree
