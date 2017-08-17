@@ -40,6 +40,14 @@ class EasyHodl < Sinatra::Base
         200
     end
 
+    get '/place-orders' do
+        User.where.not(kraken_key: nil, kraken_secret: nil).each do |user|
+            truelayer_client.fetch_user_transactions(user)
+            user.place_order
+        end
+        200
+    end
+
     private
     def truelayer_client
         @truelayer_client ||= TrueLayer.new(ENV["TRUELAYER_CLIENT_ID"], ENV["TRUELAYER_CLIENT_SECRET"])

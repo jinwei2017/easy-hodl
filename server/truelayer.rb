@@ -9,6 +9,7 @@ class TrueLayer
     DATA_URL = "https://api.truelayer.com/data/v1".freeze
     REDIRECT_URI = 'cryptosaver://truelayer'.freeze
     GRANT_TYPE = 'authorization_code'
+    GRANT_TYPE_REFRESH = 'refresh_token'
 
 
     def initialize(client_id, client_secret)
@@ -43,9 +44,27 @@ class TrueLayer
         account_ids.each do |account_id|
             fetch_transactions(user, account_id)
         end
+    rescue RestClient::Unauthorized => e
+        refresh_tokens(user)
+        user.reload
+        fetch_user_transactions(user) 
     end
 
     private
+
+    def refresh_tokens(user)
+        response = RestClient.post(AUTH_URL + '/connect/token', {
+            grant_type: GRANT_TYPE_REFRESH,
+            client_id: @client_id,
+            client_secret: @client_secret,
+            refresh_token: user.truelayer_refresh_token
+        })
+
+        body = JSON.parse(response.body)
+        access_token = body["access_token"]
+        refresh_token = body["refresh_token"]
+        user.update(truelayer_access_token: access_token, truelayer_refresh_token: refresh_token)        
+    end
 
     def fetch_account_ids(user)
         response = RestClient.get(DATA_URL + '/accounts', auth_header(user.truelayer_access_token))
