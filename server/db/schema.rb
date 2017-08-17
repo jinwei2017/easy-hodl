@@ -11,10 +11,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170817070654) do
+ActiveRecord::Schema.define(version: 20170817073836) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "orders", force: :cascade do |t|
+    t.datetime "timestamp",                      null: false
+    t.string   "currency",       default: "eur"
+    t.float    "eth",                            null: false
+    t.float    "currency_spent",                 null: false
+    t.integer  "user_id",                        null: false
+  end
+
+  add_index "orders", ["user_id"], name: "index_orders_on_user_id", using: :btree
 
   create_table "transactions", force: :cascade do |t|
     t.datetime "timestamp",      null: false
@@ -39,5 +49,6 @@ ActiveRecord::Schema.define(version: 20170817070654) do
 
   add_index "users", ["truelayer_id"], name: "index_users_on_truelayer_id", unique: true, using: :btree
 
+  add_foreign_key "orders", "users"
   add_foreign_key "transactions", "users"
 end

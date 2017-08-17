@@ -2,6 +2,7 @@ require 'sinatra'
 require "sinatra/activerecord"
 require 'json'
 require './truelayer'
+require './models/order'
 
 class EasyHodl < Sinatra::Base
     register Sinatra::ActiveRecordExtension
@@ -18,6 +19,11 @@ class EasyHodl < Sinatra::Base
             user.reload
         end
         user.transactions.to_json
+    end
+
+    get '/orders' do
+        user = User.where(truelayer_id: env["HTTP_AUTHORIZATION"]).first!
+        user.orders.to_json
     end
 
     get '/stats' do 
